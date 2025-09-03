@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres
+    container_name: banana-postgres
+    hostname: postgres
+    networks:
+      - all-together-network
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+  redis:
+    image: redis:latest
+    container_name: all-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - all-together-network
+    environment:
+      - REDIS_PASSWORD=my-password
+      - REDIS_PORT=6379
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      REDIS_HOSTS: redis
+      REDIS_HOST: redis
+      REDIS_PORT: redis:6379
+      REDIS_PASSWORD: my-password
+      HTTP_PASSWORD: my-password
+    ports:
+      - "6370:8081"
+    networks:
+      - all-together-network
+networks:
+  all-together-network:
