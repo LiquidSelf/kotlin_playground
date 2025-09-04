@@ -1,27 +1,29 @@
 package com.banana.playground.loadbalance.impl
 
 import com.banana.playground.loadbalance.LoadBalancer
-import java.util.Set.copyOf
+import com.banana.playground.loadbalance.LoadBalancerServer
+import java.util.List.copyOf
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.random.Random
 
 class RandomLoadBalancer : LoadBalancer {
-    private val servers = CopyOnWriteArrayList<String>()
 
-    override fun addServer(server: String) {
+    private val servers = CopyOnWriteArrayList<LoadBalancerServer>()
+
+    override fun addServer(server: LoadBalancerServer) {
         servers.addIfAbsent(server)
     }
 
-    override fun removeServer(server: String) {
+    override fun removeServer(server: LoadBalancerServer) {
         servers.remove(server)
     }
 
-    override fun getServers(): Set<String> {
+    override fun getServers(): Collection<LoadBalancerServer> {
         return copyOf(servers)
     }
 
-    override fun selectServer(block: String.() -> Unit) {
-        if (servers.isEmpty()) return
-        servers.random(Random)?.block()
+    override fun selectServer(block: (LoadBalancerServer) -> Unit) {
+        check(servers.isNotEmpty()) { "Server list is empty" }
+        servers.random(Random).run(block)
     }
 }

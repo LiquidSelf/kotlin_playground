@@ -64,16 +64,14 @@ class LeakyBucketRateLimiter(
 
     /**Drain [requestQueue], with best attempt to compensate the delay if necessary (the JVM may not always wake up threads promptly, especially at low delays)*/
     private suspend fun start() {
-        val stepNs = delay
-        var oversleepNs = 0.nanoseconds
-
+        var oversleepNs = Duration.ZERO
         for (deferred in requestQueue) {
             val elapsed = measureNanoTime {
                 deferred.complete(Unit)
-                if (oversleepNs > stepNs) oversleepNs -= stepNs
+                if (oversleepNs > delay) oversleepNs -= delay
                 else delay(delay)
             }
-            if (elapsed > stepNs) oversleepNs += (elapsed - stepNs)
+            if (elapsed > delay) oversleepNs += (elapsed - delay)
         }
     }
 

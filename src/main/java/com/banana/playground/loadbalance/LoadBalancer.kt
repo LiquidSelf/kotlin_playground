@@ -1,8 +1,11 @@
 package com.banana.playground.loadbalance
 
+@JvmInline
+value class LoadBalancerServer(val address: String)
+
 interface LoadBalancer {
-    fun addServer(server: String)
-    fun removeServer(server: String)
-    fun getServers(): Set<String>
-    fun selectServer(block: String.() -> Unit)
+    fun addServer(server: LoadBalancerServer)
+    fun removeServer(server: LoadBalancerServer)
+    fun getServers(): Collection<LoadBalancerServer>
+    fun selectServer(block: (LoadBalancerServer) -> Unit)
 }
