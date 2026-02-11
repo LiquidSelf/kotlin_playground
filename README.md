@@ -1,1 +1,1 @@
-# Pet repo to play with kotlin and job interview tasks
+# Pet repo to play with kotlin and some algorithms
