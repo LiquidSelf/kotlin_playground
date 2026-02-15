@@ -1,1 +1,2 @@
-# Pet repo to play with kotlin and job interview tasks
+# Kotlin practice range
+Best way to learn something is through hands-on experience.

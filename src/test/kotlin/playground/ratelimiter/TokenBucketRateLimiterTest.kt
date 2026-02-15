@@ -1,6 +1,5 @@
-package com.banana.playground.ratelimiter
+package playground.ratelimiter
 
-import com.banana.playground.ratelimit.impl.TokenBucketRateLimiter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import playground.ratelimit.impl.TokenBucketRateLimiter
 import java.util.concurrent.atomic.AtomicLong
 import java.util.stream.Stream
 import kotlin.math.floor

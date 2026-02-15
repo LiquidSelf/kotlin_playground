@@ -1,8 +1,8 @@
-package com.banana.playground.loadbalance
+package playground.loadbalance
 
-import com.banana.playground.loadbalance.impl.LeastConnectionsLoadBalancer
-import com.banana.playground.loadbalance.impl.RandomLoadBalancer
-import com.banana.playground.loadbalance.impl.RoundRobinLoadBalancer
+import playground.loadbalance.impl.LeastConnectionsLoadBalancer
+import playground.loadbalance.impl.RandomLoadBalancer
+import playground.loadbalance.impl.RoundRobinLoadBalancer
 
 /**
  * Delegates all LoadBalancer operations to the concrete strategy implementation.

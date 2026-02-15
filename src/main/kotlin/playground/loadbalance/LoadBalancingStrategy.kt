@@ -1,4 +1,4 @@
-package com.banana.playground.loadbalance
+package playground.loadbalance
 
 enum class LoadBalancingStrategy(val description: String) {
     /**

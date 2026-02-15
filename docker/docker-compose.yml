@@ -3,10 +3,10 @@ version: "3"
 services:
   postgres:
     image: postgres
-    container_name: banana-postgres
+    container_name: postgres_for_kotlin_playground
     hostname: postgres
     networks:
-      - all-together-network
+      - playground-network
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -15,12 +15,12 @@ services:
       - "5432:5432"
     restart: unless-stopped
   redis:
-    image: redis:latest
-    container_name: all-redis
+    image: redis
+    container_name: redis_for_kotlin_playground
     ports:
       - "6379:6379"
     networks:
-      - all-together-network
+      - playground-network
     environment:
       - REDIS_PASSWORD=my-password
       - REDIS_PORT=6379
@@ -36,6 +36,6 @@ services:
     ports:
       - "6370:8081"
     networks:
-      - all-together-network
+      - playground-network
 networks:
-  all-together-network:
+  playground-network:

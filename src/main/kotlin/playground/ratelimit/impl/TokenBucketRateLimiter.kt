@@ -1,10 +1,17 @@
-package com.banana.playground.ratelimit.impl
+package playground.ratelimit.impl
 
-import com.banana.playground.ratelimit.RateLimiter
+import playground.ratelimit.RateLimiter
+import playground.ratelimit.RateLimiter.RateLimitExceededException
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Simple Token Bucket algorithm implementation,
+ * bucket being refilled on successful [tryAcquire] call, as a side effect.
+ * In case of failed acquire attempt (bucket empty) throws [RateLimitExceededException] immediately.
+ * Otherwise, executes block.
+ */
 class TokenBucketRateLimiter(
     val initialCapacity: Int,
     val maxCapacity: Int,
@@ -17,7 +24,7 @@ class TokenBucketRateLimiter(
 
     override suspend fun <T> execute(block: suspend () -> T): T {
         if (tryAcquire()) return block()
-        else throw RateLimitExceeded()
+        else throw RateLimitExceededException()
     }
 
     fun tryAcquire(): Boolean {
@@ -35,5 +42,4 @@ class TokenBucketRateLimiter(
     }
 
     data class Bucket(val tokens: Double, val lastUpdate: Long)
-    class RateLimitExceeded : RuntimeException("Rate limit exceeded")
 }

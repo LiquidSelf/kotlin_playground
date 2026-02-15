@@ -1,14 +1,16 @@
-package com.banana.playground.ratelimit.impl
+package playground.ratelimit.impl
 
-import com.banana.playground.ratelimit.RateLimiter
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import playground.ratelimit.RateLimiter
+import playground.ratelimit.RateLimiter.RateLimitExceededException
 import java.util.concurrent.Executors
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 
 /**
- * A leaky‑bucket rate limiter that processes requests sequentially with a configurable delay.
+ * A leaky‑bucket rate limiter that enqueues executables and execute them with [delay] interval, sequentially.
+ * [dispatcherScope] only 'releases' task, task itself will get executed on an original dispatcher.
  *
  * <p>The limiter accepts up to {@code bufferCapacity} pending requests. Each request is wrapped in a
  * {@link CompletableDeferred} and queued; the internal coroutine drains the queue, ensuring that
@@ -18,25 +20,26 @@ import kotlin.time.Duration.Companion.nanoseconds
  * @param bufferCapacity maximum number of pending requests (default: {@link Integer#MAX_VALUE})
  * @param delay          time interval between consecutive executions
  * @param nowInNanoProvider provides the current time in nanoseconds; defaults to {@code System.nanoTime()}
- * @param daemonDispatcher dispatcher used for the internal coroutine; defaults to a single‑threaded daemon executor
+ * @param dispatcherScope dispatcher used for the internal tasks 'release' process; defaults to a single‑threaded daemon executor
  */
 class LeakyBucketRateLimiter(
     val bufferCapacity: Int = Int.MAX_VALUE,
     val delay: Duration,
     private val nowInNanoProvider: () -> Long = { System.nanoTime() },
-    private val daemonDispatcher: CoroutineDispatcher =
-        Executors.newSingleThreadExecutor { runnable ->
-            Thread(runnable).apply {
-                isDaemon = true
-                name = "LeakyBucketRL"
-            }
-        }.asCoroutineDispatcher()
+    private val dispatcherScope: CoroutineScope =
+        CoroutineScope(
+            Executors.newSingleThreadExecutor { runnable ->
+                Thread(runnable).apply {
+                    isDaemon = true
+                    name = "LeakyBucketRL_Thread"
+                }
+            }.asCoroutineDispatcher() + CoroutineName("RL_Scope")
+        ),
 ) : RateLimiter {
     private val requestQueue = Channel<CompletableDeferred<Unit>>(bufferCapacity)
-    private val privateScope = CoroutineScope(daemonDispatcher + CoroutineName("LeakyBucket"))
 
     init {
-        privateScope.launch {
+        dispatcherScope.launch {
             start()
         }
     }
@@ -58,7 +61,7 @@ class LeakyBucketRateLimiter(
 
         val trySend = requestQueue.trySend(deferred)
         if (trySend.isSuccess) return wrapper()
-        else throw trySend.exceptionOrNull() ?: IllegalStateException("Rate limiter overflown")
+        else throw trySend.exceptionOrNull() ?: RateLimitExceededException("Rate limiter overflown")
     }
 
 
@@ -89,7 +92,6 @@ class LeakyBucketRateLimiter(
         for (deferred in requestQueue) {
             deferred.cancel(message)
         }
-        privateScope.cancel(message)
-        daemonDispatcher.cancel(CancellationException(message))
+        dispatcherScope.cancel(message)
     }
 }

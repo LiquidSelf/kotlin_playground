@@ -1,17 +1,17 @@
-package com.banana.playground.loadbalancer
+package playground.loadbalancer
 
-import com.banana.playground.loadbalance.DelegatingLoadBalancer
-import com.banana.playground.loadbalance.LoadBalancerServer
-import com.banana.playground.loadbalance.LoadBalancingStrategy
-import com.banana.playground.loadbalance.impl.LeastConnectionsLoadBalancer
-import com.banana.playground.loadbalance.impl.RandomLoadBalancer
-import com.banana.playground.loadbalance.impl.RoundRobinLoadBalancer
 import kotlinx.coroutines.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.assertInstanceOf
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import playground.loadbalance.DelegatingLoadBalancer
+import playground.loadbalance.LoadBalancer.ServerAddress
+import playground.loadbalance.LoadBalancingStrategy
+import playground.loadbalance.impl.LeastConnectionsLoadBalancer
+import playground.loadbalance.impl.RandomLoadBalancer
+import playground.loadbalance.impl.RoundRobinLoadBalancer
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
@@ -27,7 +27,7 @@ class LoadBalancerTest {
     fun testAddServer(strategy: LoadBalancingStrategy) {
         val loadBalancer = DelegatingLoadBalancer(strategy)
 
-        val testServer = LoadBalancerServer("testServer")
+        val testServer = ServerAddress("testServer")
         assertThat("Expected no servers", loadBalancer.getServers(), empty())
         loadBalancer.addServer(testServer)
         assertThat("Contains server", loadBalancer.getServers(), contains(testServer))
@@ -40,7 +40,7 @@ class LoadBalancerTest {
     fun testRemoveServer(strategy: LoadBalancingStrategy) {
         val loadBalancer = DelegatingLoadBalancer(strategy)
 
-        val testServer = LoadBalancerServer("testServer")
+        val testServer = ServerAddress("testServer")
         assertThat("Expected no servers", loadBalancer.getServers(), empty())
         loadBalancer.addServer(testServer)
         assertThat("Should contain one server", loadBalancer.getServers().size, equalTo(1))
@@ -90,9 +90,9 @@ class LoadBalancerTest {
 
         val serverCount = 100
 
-        val addedServers = mutableListOf<LoadBalancerServer>()
+        val addedServers = mutableListOf<ServerAddress>()
         repeat(serverCount) { i ->
-            LoadBalancerServer("testServer_$i").also { server ->
+            ServerAddress("testServer_$i").also { server ->
                 addedServers.add(server)
                 loadBalancer.addServer(server)
                 assertContains(loadBalancer.getServers(), server, "Should contain server")
@@ -114,7 +114,7 @@ class LoadBalancerTest {
         val serverCount = 100
         val requestCount = 100_000
         repeat(serverCount) { i ->
-            LoadBalancerServer("testServer_$i").also { server ->
+            ServerAddress("testServer_$i").also { server ->
                 loadBalancer.addServer(server)
                 assertThat("Should contain server", loadBalancer.getServers(), hasItem(server))
             }
@@ -122,7 +122,7 @@ class LoadBalancerTest {
 
         assertEquals(serverCount, loadBalancer.getServers().size, "Should contain $serverCount servers")
 
-        val serverAndDistribution = ConcurrentHashMap<LoadBalancerServer, AtomicInteger>()
+        val serverAndDistribution = ConcurrentHashMap<ServerAddress, AtomicInteger>()
         val awaitUs: MutableList<Deferred<Any>> = mutableListOf()
         val executedCount = AtomicInteger(0)
         repeat(requestCount) {
