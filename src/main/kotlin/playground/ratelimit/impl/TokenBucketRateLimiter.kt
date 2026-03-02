@@ -1,7 +1,7 @@
 package playground.ratelimit.impl
 
+import playground.ratelimit.RateLimitExceededException
 import playground.ratelimit.RateLimiter
-import playground.ratelimit.RateLimiter.RateLimitExceededException
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds

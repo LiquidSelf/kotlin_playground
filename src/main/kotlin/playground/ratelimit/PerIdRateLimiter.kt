@@ -3,10 +3,10 @@ package playground.ratelimit
 /**
  * Ratelimiter as suspendable 'wrapper' around executable (limited) block.
  */
-interface RateLimiter {
+interface PerIdRateLimiter {
 
     /**
      * Executes [block] within some rate.
      */
-    suspend fun <T> execute(block: suspend () -> T): T
+    suspend fun <T> execute(id: Any, block: suspend () -> T): T
 }

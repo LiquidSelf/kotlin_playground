@@ -2,8 +2,8 @@ package playground.ratelimit.impl
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import playground.ratelimit.RateLimitExceededException
 import playground.ratelimit.RateLimiter
-import playground.ratelimit.RateLimiter.RateLimitExceededException
 import java.util.concurrent.Executors
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
